@@ -679,7 +679,7 @@
           return `<div class="arr-card main live">
             <span class="arr-badge">70C</span>
             <div class="arr-main-text">
-              <span class="arr-when">${locTxt}<small>${when}</small></span>
+              <span class="arr-when">${when}<small>${locTxt}</small></span>
               <span class="arr-abs">${meta || '70C 버스'}</span>
             </div>
             <span class="arr-live">LIVE</span>
@@ -688,8 +688,8 @@
         return `<div class="arr-card">
           <span class="arr-badge" style="opacity:.85">70C</span>
           <div class="arr-sub">
-            <span>다음 버스 ${locTxt}</span>
-            <span class="arr-mini">${when}${meta ? ' · ' + meta : ''}</span>
+            <span class="arr-mini">${when}</span>
+            <span class="arr-sub-meta">다음 버스 ${locTxt}${meta ? ' · ' + meta : ''}</span>
           </div>
         </div>`;
       }).filter(Boolean).join('');
@@ -698,7 +698,7 @@
       arrivalHtml = `<div class="arr-card main live">
         <span class="arr-badge">70C</span>
         <div class="arr-main-text">
-          <span class="arr-when">실시간 도착정보 확인 중<small>잠시만요</small></span>
+          <span class="arr-when is-status">실시간 도착정보 확인 중<small>잠시만요</small></span>
           <span class="arr-abs">경기버스정보에 지금 물어보고 있어요</span>
         </div>
       </div>`;
@@ -712,16 +712,16 @@
         const mins = Math.max(0, Math.round(first - now));
         const dayDiff = Math.floor(first / 1440);
         const when = dayDiff > 0
-          ? `${dayDiff === 1 ? '내일' : '모레'} ${fmtHM(first)}`
-          : (mins <= 0 ? '지금 도착' : `${mins}분 후`);
+          ? `${dayDiff === 1 ? '내일' : '모레'} 첫차`
+          : (mins <= 0 ? '지금 도착' : `${mins}분 후 도착`);
         const abs = dayDiff > 0
-          ? '오늘 운행이 끝난 뒤 첫차'
+          ? `오늘 운행이 끝난 뒤 ${fmtHM(first)} 첫차`
           : `${fmtHM(first)} ${stop.pass ? '통과' : '도착'} 예정`;
         sched += `
           <div class="arr-card main">
             <span class="arr-badge">70C</span>
             <div class="arr-main-text">
-              <span class="arr-when">${when}<small>${dayDiff > 0 ? '첫차' : (stop.pass ? '통과 예정' : '도착 예정')}</small></span>
+              <span class="arr-when">${when}<small>${dayDiff > 0 ? fmtHM(first) : (stop.pass ? '통과 예정' : '도착 예정')}</small></span>
               <span class="arr-abs">${abs}</span>
             </div>
           </div>`;

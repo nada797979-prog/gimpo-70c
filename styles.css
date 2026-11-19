@@ -434,14 +434,16 @@ main{
   background:linear-gradient(140deg,#3B82F6,#2563EB 60%,#12B5A4 140%);
   box-shadow:0 4px 10px -6px rgba(37,99,235,.9);
 }
-.arr-main-text{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.arr-when{font-size:23px;font-weight:800;letter-spacing:-.03em;color:var(--blue-ink);line-height:1.25}
-.arr-when small{font-size:15px;font-weight:750;color:#40618A;margin-left:5px;letter-spacing:-.02em}
+.arr-main-text{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.arr-when{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;font-size:27px;font-weight:850;letter-spacing:-.035em;color:var(--blue-ink);line-height:1.18}
+.arr-when small{font-size:15.5px;font-weight:750;color:#40618A;letter-spacing:-.02em;margin:0}
+.arr-when.is-status{font-size:17.5px;font-weight:750;letter-spacing:-.02em;color:#2F5AA8}
 .arr-abs{font-size:13.5px;color:var(--muted);font-weight:650;font-variant-numeric:tabular-nums}
 .arr-sub{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:4px 10px;flex-wrap:wrap;
   font-size:13.5px;color:var(--ink-2);font-weight:650;
 }
+.arr-sub .arr-sub-meta{font-size:12.4px;font-weight:600;color:var(--muted);text-align:right;line-height:1.4}
 .arr-sub .arr-mini{font-size:15px;font-weight:780;color:#2F4C74;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .arr-none{
   background:#FFF8EC;border:1px solid #F8E7C4;color:#8A5A00;
