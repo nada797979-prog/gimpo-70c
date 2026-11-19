@@ -96,7 +96,8 @@
   const TURN_END = 17;  // 김포공항역 회차(3분)
   const RT = 32;        // 기점 출발 → 기점 도착 (한 바퀴)
 
-  const GEO = { W: 360, H: 578, xL: 126, xR: 234, yTop: 70, yBot: 518, dip: 30 };
+  const GEO = { W: 360, H: 676, xL: 126, xR: 234, yTop: 72, yBot: 628, dip: 34 };
+  const LABEL_GAP = 16;   // 정류장 점 ↔ 이름 사이 여백
 
   /* ---------------------------------------------------------
      3. 시간 도우미
@@ -209,10 +210,10 @@
 
     const defs = el('defs');
     defs.innerHTML = `
-      <linearGradient id="gUp" gradientUnits="userSpaceOnUse" x1="126" y1="70" x2="126" y2="518">
+      <linearGradient id="gUp" gradientUnits="userSpaceOnUse" x1="${GEO.xL}" y1="${GEO.yTop}" x2="${GEO.xL}" y2="${GEO.yBot}">
         <stop offset="0" stop-color="#5B9BFF"/><stop offset="1" stop-color="#2563EB"/>
       </linearGradient>
-      <linearGradient id="gDown" gradientUnits="userSpaceOnUse" x1="234" y1="518" x2="234" y2="70">
+      <linearGradient id="gDown" gradientUnits="userSpaceOnUse" x1="${GEO.xR}" y1="${GEO.yBot}" x2="${GEO.xR}" y2="${GEO.yTop}">
         <stop offset="0" stop-color="#0FB5A0"/><stop offset="1" stop-color="#38D9C0"/>
       </linearGradient>
       <linearGradient id="gBus" x1="0" y1="0" x2="1" y2="1">
@@ -226,7 +227,7 @@
     // 트랙(전체 바퀴)
     const all = [];
     for (let t = 0; t <= RT; t += 0.08) { const p = pointAt(t); all.push(`${p.x.toFixed(2)},${p.y.toFixed(2)}`); }
-    svg.appendChild(el('path', { d: 'M ' + all.join(' L '), fill: 'none', stroke: '#DCE5F1', 'stroke-width': 9, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    svg.appendChild(el('path', { d: 'M ' + all.join(' L '), fill: 'none', stroke: '#DCE5F1', 'stroke-width': 12.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
 
     // 상행 / 하행 / 회차
     const seg = (t0, t1) => {
@@ -234,49 +235,50 @@
       for (let t = t0; t <= t1 + 1e-6; t += 0.05) { const p = pointAt(t); pts.push(`${p.x.toFixed(2)},${p.y.toFixed(2)}`); }
       return 'M ' + pts.join(' L ');
     };
-    svg.appendChild(el('path', { d: seg(0, OUT_END), fill: 'none', stroke: 'url(#gUp)', 'stroke-width': 5.6, 'stroke-linecap': 'round' }));
-    svg.appendChild(el('path', { d: seg(TURN_END, RT), fill: 'none', stroke: 'url(#gDown)', 'stroke-width': 5.6, 'stroke-linecap': 'round' }));
-    svg.appendChild(el('path', { d: seg(OUT_END, TURN_END), fill: 'none', stroke: '#BFD0E4', 'stroke-width': 4.4, 'stroke-dasharray': '1.6 5', 'stroke-linecap': 'round' }));
+    svg.appendChild(el('path', { d: seg(0, OUT_END), fill: 'none', stroke: 'url(#gUp)', 'stroke-width': 7.6, 'stroke-linecap': 'round' }));
+    svg.appendChild(el('path', { d: seg(TURN_END, RT), fill: 'none', stroke: 'url(#gDown)', 'stroke-width': 7.6, 'stroke-linecap': 'round' }));
+    svg.appendChild(el('path', { d: seg(OUT_END, TURN_END), fill: 'none', stroke: '#BFD0E4', 'stroke-width': 6, 'stroke-dasharray': '2 7.5', 'stroke-linecap': 'round' }));
 
     // 방면 캡션
-    const capL = el('text', { x: 100, y: 34, 'text-anchor': 'end', class: 'dir-caption up' }, '↓ 김포공항역 방면');
-    const capR = el('text', { x: 260, y: 34, 'text-anchor': 'start', class: 'dir-caption down' }, '↑ 힐스테이트 방면');
+    const capY = GEO.yTop - 40;
+    const capL = el('text', { x: GEO.xL - LABEL_GAP, y: capY, 'text-anchor': 'end', class: 'dir-caption up' }, '↓ 김포공항역 방면');
+    const capR = el('text', { x: GEO.xR + LABEL_GAP, y: capY, 'text-anchor': 'start', class: 'dir-caption down' }, '↑ 힐스테이트 방면');
     svg.appendChild(capL); svg.appendChild(capR);
 
-    // 정류장
-    STOPS.forEach((s) => {
+    // 정류장 (미정차 구간은 노선도에 그리지 않음 — 내부 시퀀스는 1~18 그대로 유지)
+    STOPS.filter((s) => !s.pass).forEach((s) => {
       const p = pointAt(s.t);
-      const g = el('g', { class: 'stop-g' + (s.pass ? ' pass' : '') + (s.tag ? ' terminus' : ''), 'data-stop': s.i });
-      g.appendChild(el('circle', { class: 'stop-halo', cx: p.x, cy: p.y, r: 13, fill: s.dir === 'up' ? 'rgba(37,99,235,.13)' : 'rgba(15,181,160,.15)' }));
-      if (s.pass) {
-        g.appendChild(el('rect', { x: p.x - 3.4, y: p.y - 3.4, width: 6.8, height: 6.8, rx: 1.6, transform: `rotate(45 ${p.x} ${p.y})`, fill: '#fff', stroke: '#C3CFE0', 'stroke-width': 1.6 }));
-      } else if (s.tag) {
-        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 6.4, fill: '#fff', stroke: s.dir === 'up' ? '#2563EB' : '#0FB5A0', 'stroke-width': 2.2 }));
-        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 2.6, fill: s.dir === 'up' ? '#2563EB' : '#0FB5A0' }));
+      const g = el('g', { class: 'stop-g' + (s.tag ? ' terminus' : ''), 'data-stop': s.i });
+      g.appendChild(el('circle', { class: 'stop-halo', cx: p.x, cy: p.y, r: 17, fill: s.dir === 'up' ? 'rgba(37,99,235,.13)' : 'rgba(15,181,160,.15)' }));
+      if (s.tag) {
+        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 8.4, fill: '#fff', stroke: s.dir === 'up' ? '#2563EB' : '#0FB5A0', 'stroke-width': 2.8 }));
+        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 3.6, fill: s.dir === 'up' ? '#2563EB' : '#0FB5A0' }));
       } else {
-        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 4.6, fill: '#fff', stroke: s.dir === 'up' ? '#2563EB' : '#0FB5A0', 'stroke-width': 2 }));
+        g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 6, fill: '#fff', stroke: s.dir === 'up' ? '#2563EB' : '#0FB5A0', 'stroke-width': 2.6 }));
       }
 
       const anchor = s.dir === 'up' ? 'end' : 'start';
-      const lx = s.dir === 'up' ? p.x - 26 : p.x + 26;
-      const t1 = el('text', { x: lx, y: p.y - 0.6, 'text-anchor': anchor, class: 'stop-label-1' }, s.label[0]);
+      const lx = s.dir === 'up' ? p.x - LABEL_GAP : p.x + LABEL_GAP;
+      const twoLine = !!s.label[1];
+      const y1 = twoLine ? p.y - 4.4 : p.y + 5;
+      const t1 = el('text', { x: lx, y: y1, 'text-anchor': anchor, class: 'stop-label-1' }, s.label[0]);
       g.appendChild(t1);
-      if (s.label[1]) {
-        const t2 = el('text', { x: lx, y: p.y + 9.4, 'text-anchor': anchor, class: 'stop-label-2' }, s.label[1]);
+      if (twoLine) {
+        const t2 = el('text', { x: lx, y: p.y + 11.6, 'text-anchor': anchor, class: 'stop-label-2' }, s.label[1]);
         g.appendChild(t2);
       }
 
       // 넉넉한 터치 영역 (점 + 이름 전체)
       g.appendChild(el('rect', {
-        x: s.dir === 'up' ? p.x - 104 : p.x - 8,
-        y: p.y - 13,
-        width: 112,
-        height: 26,
-        rx: 13,
+        x: s.dir === 'up' ? p.x - 134 : p.x - 4,
+        y: p.y - 17,
+        width: 138,
+        height: 34,
+        rx: 17,
         fill: 'rgba(0,0,0,0)',
         class: 'stop-hit'
       }));
-      g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 19, fill: 'rgba(0,0,0,0)', class: 'stop-hit' }));
+      g.appendChild(el('circle', { cx: p.x, cy: p.y, r: 22, fill: 'rgba(0,0,0,0)', class: 'stop-hit' }));
       g.addEventListener('click', (e) => { e.stopPropagation(); openSheet(s.i); });
       svg.appendChild(g);
     });
@@ -340,19 +342,19 @@
   function busSvg() {
     const g = el('g', { class: 'bus' });
     g.innerHTML = `
-      <circle class="bus-pulse" cx="0" cy="0" r="16" fill="rgba(37,99,235,.18)"></circle>
-      <ellipse cx="0" cy="12.6" rx="13" ry="3.2" fill="rgba(16,32,56,.16)"></ellipse>
+      <circle class="bus-pulse" cx="0" cy="0" r="20" fill="rgba(37,99,235,.18)"></circle>
+      <ellipse cx="0" cy="15.8" rx="16.2" ry="4" fill="rgba(16,32,56,.16)"></ellipse>
       <g filter="url(#busShadow)">
-        <rect x="-16" y="-10.4" width="32" height="20.4" rx="5.4" fill="url(#gBus)"></rect>
-        <rect x="-12.6" y="-7.4" width="10.4" height="5.6" rx="1.6" fill="#EAF3FF" opacity=".95"></rect>
-        <rect x="-0.4" y="-7.4" width="10.4" height="5.6" rx="1.6" fill="#EAF3FF" opacity=".95"></rect>
-        <text class="bus-num" x="0" y="7.7" text-anchor="middle" font-size="7.4" font-weight="800" fill="#FFFFFF" letter-spacing=".02em">70C</text>
+        <rect x="-20" y="-13" width="40" height="25.5" rx="6.7" fill="url(#gBus)"></rect>
+        <rect x="-15.7" y="-9.2" width="13" height="7" rx="2" fill="#EAF3FF" opacity=".95"></rect>
+        <rect x="-0.6" y="-9.2" width="13" height="7" rx="2" fill="#EAF3FF" opacity=".95"></rect>
+        <text class="bus-num" x="0" y="9.8" text-anchor="middle" font-size="9.3" font-weight="800" fill="#FFFFFF" letter-spacing=".02em">70C</text>
       </g>
-      <circle cx="-9.2" cy="10.6" r="2.7" fill="#16233A"></circle>
-      <circle cx="9.2" cy="10.6" r="2.7" fill="#16233A"></circle>
+      <circle cx="-11.5" cy="13" r="3.4" fill="#16233A"></circle>
+      <circle cx="11.5" cy="13" r="3.4" fill="#16233A"></circle>
       <g class="bus-flags" style="display:none">
-        <rect x="17" y="-4.7" width="21" height="9.4" rx="3" fill="#0B7F72"></rect>
-        <text x="27.5" y="2.3" text-anchor="middle" font-size="6.3" font-weight="800" fill="#EAFFFB">저상</text>
+        <rect x="21.2" y="-5.9" width="26.5" height="11.8" rx="3.8" fill="#0B7F72"></rect>
+        <text x="34.4" y="2.9" text-anchor="middle" font-size="7.9" font-weight="800" fill="#EAFFFB">저상</text>
       </g>`;
     return g;
   }
@@ -415,7 +417,7 @@
       const flags = node.querySelector('.bus-flags');
       const disp = showFlags ? '' : 'none';
       if (flags.style.display !== disp) flags.style.display = disp;
-      flags.setAttribute('transform', v.dir === 'down' ? 'translate(-55 0)' : 'translate(0 0)');
+      flags.setAttribute('transform', v.dir === 'down' ? 'translate(-69 0)' : 'translate(0 0)');
 
       const pulse = node.querySelector('.bus-pulse');
       if (v.live) {
@@ -755,13 +757,6 @@
       </div>
 
       <div class="sh-arrivals">${arrivalHtml}</div>
-
-      <div class="sh-facts">
-        <div class="fact"><span class="k">첫차 · 막차</span><span class="v">${fmtHM(facts.first)} · ${fmtHM(facts.last)}</span></div>
-        <div class="fact"><span class="k">오늘 남은 출발</span><span class="v">${facts.remain}회 / ${facts.total}회</span></div>
-        <div class="fact"><span class="k">정차 여부</span><span class="v">${stop.pass ? '미정차(통과)' : '정차'}</span></div>
-        ${stop.addr ? `<div class="fact"><span class="k">정류장 위치</span><span class="v v-addr">${stop.addr}</span></div>` : ''}
-      </div>
 
       <div class="sh-links">
         <a class="link-btn kakao" href="${kakaoHref}" target="_blank" rel="noopener">
