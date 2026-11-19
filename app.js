@@ -96,7 +96,16 @@
   const TURN_END = 17;  // 김포공항역 회차(3분)
   const RT = 32;        // 기점 출발 → 기점 도착 (한 바퀴)
 
-  const GEO = { W: 360, H: 676, xL: 128, xR: 232, yTop: 72, yBot: 628, dip: 34 };
+  // 정차 정류장이 몰린 구간(고촌역까지)은 넓게, 미정차 구간(고촌IC~김포공항)은 짧게
+  const UP_DENSE_END = 7;      // 상행 마지막 정차 정류장(고촌역)
+  const DOWN_DENSE_START = 25; // 하행 첫 정차 정류장(고촌역)
+
+  const GEO = {
+    W: 360, H: 516,
+    xL: 128, xR: 232,
+    yTop: 50, yBot: 488, dip: 26,
+    dense: 280, express: 158
+  };
   const LABEL_GAP = 25;   // 정류장 점 ↔ 이름 사이 여백 (버스 아이콘와 겹치지 않게)
 
   /* ---------------------------------------------------------
@@ -179,17 +188,21 @@
      5. 노선도 좌표
      --------------------------------------------------------- */
   function pointAt(t) {
-    const top = GEO.yTop, bot = GEO.yBot;
+    const { xL, xR, yTop, yBot, dense, express, dip } = GEO;
     if (t <= OUT_END) {
-      const r = Math.max(0, t) / OUT_END;
-      return { x: GEO.xL, y: top + r * (bot - top) };
+      const y = t <= UP_DENSE_END
+        ? yTop + (Math.max(0, t) / UP_DENSE_END) * dense
+        : yTop + dense + ((t - UP_DENSE_END) / (OUT_END - UP_DENSE_END)) * express;
+      return { x: xL, y };
     }
     if (t <= TURN_END) {
       const r = (t - OUT_END) / (TURN_END - OUT_END);
-      return { x: GEO.xL + r * (GEO.xR - GEO.xL), y: bot + Math.sin(r * Math.PI) * GEO.dip };
+      return { x: xL + r * (xR - xL), y: yBot + Math.sin(r * Math.PI) * dip };
     }
-    const r = Math.min(1, (t - TURN_END) / (RT - TURN_END));
-    return { x: GEO.xR, y: bot - r * (bot - top) };
+    const y = t <= DOWN_DENSE_START
+      ? yBot - ((t - TURN_END) / (DOWN_DENSE_START - TURN_END)) * express
+      : yBot - express - ((t - DOWN_DENSE_START) / (RT - DOWN_DENSE_START)) * dense;
+    return { x: xR, y };
   }
 
   /* ---------------------------------------------------------
@@ -240,7 +253,7 @@
     svg.appendChild(el('path', { d: seg(OUT_END, TURN_END), fill: 'none', stroke: '#BFD0E4', 'stroke-width': 6, 'stroke-dasharray': '2 7.5', 'stroke-linecap': 'round' }));
 
     // 방면 캡션
-    const capY = GEO.yTop - 40;
+    const capY = GEO.yTop - 30;
     const capL = el('text', { x: GEO.xL - LABEL_GAP, y: capY, 'text-anchor': 'end', class: 'dir-caption up' }, '↓ 김포공항역 방면');
     const capR = el('text', { x: GEO.xR + LABEL_GAP, y: capY, 'text-anchor': 'start', class: 'dir-caption down' }, '↑ 힐스테이트 방면');
     svg.appendChild(capL); svg.appendChild(capR);
