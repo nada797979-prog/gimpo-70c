@@ -715,13 +715,13 @@
           ? `${dayDiff === 1 ? '내일' : '모레'} 첫차`
           : (mins <= 0 ? '지금 도착' : `${mins}분 후 도착`);
         const abs = dayDiff > 0
-          ? `오늘 운행이 끝난 뒤 ${fmtHM(first)} 첫차`
-          : `${fmtHM(first)} ${stop.pass ? '통과' : '도착'} 예정`;
+          ? '오늘 운행이 모두 끝났어요'
+          : (stop.pass ? '이 정류장에 서지 않고 지나갑니다' : '시간표 기준 예상 도착');
         sched += `
           <div class="arr-card main">
             <span class="arr-badge">70C</span>
             <div class="arr-main-text">
-              <span class="arr-when">${when}<small>${dayDiff > 0 ? fmtHM(first) : (stop.pass ? '통과 예정' : '도착 예정')}</small></span>
+              <span class="arr-when">${when}<small>${fmtHM(first)} ${stop.pass && dayDiff <= 0 ? '통과' : (dayDiff > 0 ? '첫차' : '예정')}</small></span>
               <span class="arr-abs">${abs}</span>
             </div>
           </div>`;
