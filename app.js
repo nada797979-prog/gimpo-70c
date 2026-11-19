@@ -102,11 +102,11 @@
 
   const GEO = {
     W: 360, H: 516,
-    xL: 128, xR: 232,
+    xL: 130, xR: 230,
     yTop: 50, yBot: 488, dip: 26,
     dense: 280, express: 158
   };
-  const LABEL_GAP = 25;   // 정류장 점 ↔ 이름 사이 여백 (버스 아이콘와 겹치지 않게)
+  const LABEL_GAP = 26;   // 정류장 점 ↔ 이름 사이 여백 (버스 아이콘와 겹치지 않게)
 
   /* ---------------------------------------------------------
      3. 시간 도우미
@@ -273,20 +273,20 @@
       const anchor = s.dir === 'up' ? 'end' : 'start';
       const lx = s.dir === 'up' ? p.x - LABEL_GAP : p.x + LABEL_GAP;
       const twoLine = !!s.label[1];
-      const y1 = twoLine ? p.y - 4.2 : p.y + 4.8;
+      const y1 = twoLine ? p.y - 5.6 : p.y + 5.6;
       const t1 = el('text', { x: lx, y: y1, 'text-anchor': anchor, class: 'stop-label-1' }, s.label[0]);
       g.appendChild(t1);
       if (twoLine) {
-        const t2 = el('text', { x: lx, y: p.y + 11.6, 'text-anchor': anchor, class: 'stop-label-2' }, s.label[1]);
+        const t2 = el('text', { x: lx, y: p.y + 13.4, 'text-anchor': anchor, class: 'stop-label-2' }, s.label[1]);
         g.appendChild(t2);
       }
 
       // 넉넉한 터치 영역 (점 + 이름 전체)
       g.appendChild(el('rect', {
-        x: s.dir === 'up' ? p.x - 127 : p.x - 4,
-        y: p.y - 17,
-        width: 131,
-        height: 34,
+        x: s.dir === 'up' ? p.x - 138 : p.x - 4,
+        y: p.y - 19,
+        width: 142,
+        height: 38,
         rx: 17,
         fill: 'rgba(0,0,0,0)',
         class: 'stop-hit'

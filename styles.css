@@ -217,8 +217,8 @@ main{
 .stop-g:hover .stop-label-1,.stop-g.is-active .stop-label-1{fill:var(--blue-ink)}
 .stop-g.is-active .stop-halo{opacity:1}
 .stop-halo{opacity:0;transition:opacity .2s ease}
-.stop-label-1{font-size:13.2px;font-weight:700;fill:#152A45;letter-spacing:-.03em}
-.stop-label-2{font-size:11px;font-weight:550;fill:#8A98AD;letter-spacing:-.03em}
+.stop-label-1{font-size:15.6px;font-weight:750;fill:#152A45;letter-spacing:-.03em}
+.stop-label-2{font-size:12.6px;font-weight:600;fill:#78879E;letter-spacing:-.03em}
 .stop-g.pass .stop-label-1{fill:#7C8CA4;font-weight:600}
 .stop-g.pass .stop-label-2{fill:#A9B5C6}
 .stop-g.terminus .stop-label-1{fill:#0F2A4E;font-weight:750}
@@ -231,7 +231,7 @@ main{
 }
 .bus-label{font-size:8.4px;font-weight:650;fill:#4A5E7A;letter-spacing:-.02em;paint-order:stroke;stroke:#fff;stroke-width:2.6px;stroke-linejoin:round}
 .bus.is-turning .bus-label{fill:#B45309}
-.dir-caption{font-size:12.5px;font-weight:750;letter-spacing:-.01em;fill:#95A6BD}
+.dir-caption{font-size:13.4px;font-weight:750;letter-spacing:-.01em;fill:#95A6BD}
 .dir-caption.up{fill:#5B8AF0}
 .dir-caption.down{fill:#17B6A1}
 
