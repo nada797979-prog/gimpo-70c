@@ -217,8 +217,8 @@ main{
 .stop-g:hover .stop-label-1,.stop-g.is-active .stop-label-1{fill:var(--blue-ink)}
 .stop-g.is-active .stop-halo{opacity:1}
 .stop-halo{opacity:0;transition:opacity .2s ease}
-.stop-label-1{font-size:14px;font-weight:700;fill:#152A45;letter-spacing:-.035em}
-.stop-label-2{font-size:11.5px;font-weight:550;fill:#8A98AD;letter-spacing:-.03em}
+.stop-label-1{font-size:13.2px;font-weight:700;fill:#152A45;letter-spacing:-.03em}
+.stop-label-2{font-size:11px;font-weight:550;fill:#8A98AD;letter-spacing:-.03em}
 .stop-g.pass .stop-label-1{fill:#7C8CA4;font-weight:600}
 .stop-g.pass .stop-label-2{fill:#A9B5C6}
 .stop-g.terminus .stop-label-1{fill:#0F2A4E;font-weight:750}

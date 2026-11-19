@@ -96,8 +96,8 @@
   const TURN_END = 17;  // 김포공항역 회차(3분)
   const RT = 32;        // 기점 출발 → 기점 도착 (한 바퀴)
 
-  const GEO = { W: 360, H: 676, xL: 126, xR: 234, yTop: 72, yBot: 628, dip: 34 };
-  const LABEL_GAP = 16;   // 정류장 점 ↔ 이름 사이 여백
+  const GEO = { W: 360, H: 676, xL: 128, xR: 232, yTop: 72, yBot: 628, dip: 34 };
+  const LABEL_GAP = 25;   // 정류장 점 ↔ 이름 사이 여백 (버스 아이콘와 겹치지 않게)
 
   /* ---------------------------------------------------------
      3. 시간 도우미
@@ -260,7 +260,7 @@
       const anchor = s.dir === 'up' ? 'end' : 'start';
       const lx = s.dir === 'up' ? p.x - LABEL_GAP : p.x + LABEL_GAP;
       const twoLine = !!s.label[1];
-      const y1 = twoLine ? p.y - 4.4 : p.y + 5;
+      const y1 = twoLine ? p.y - 4.2 : p.y + 4.8;
       const t1 = el('text', { x: lx, y: y1, 'text-anchor': anchor, class: 'stop-label-1' }, s.label[0]);
       g.appendChild(t1);
       if (twoLine) {
@@ -270,9 +270,9 @@
 
       // 넉넉한 터치 영역 (점 + 이름 전체)
       g.appendChild(el('rect', {
-        x: s.dir === 'up' ? p.x - 134 : p.x - 4,
+        x: s.dir === 'up' ? p.x - 127 : p.x - 4,
         y: p.y - 17,
-        width: 138,
+        width: 131,
         height: 34,
         rx: 17,
         fill: 'rgba(0,0,0,0)',
@@ -342,19 +342,19 @@
   function busSvg() {
     const g = el('g', { class: 'bus' });
     g.innerHTML = `
-      <circle class="bus-pulse" cx="0" cy="0" r="20" fill="rgba(37,99,235,.18)"></circle>
-      <ellipse cx="0" cy="15.8" rx="16.2" ry="4" fill="rgba(16,32,56,.16)"></ellipse>
+      <circle class="bus-pulse" cx="0" cy="0" r="21" fill="rgba(37,99,235,.16)"></circle>
+      <ellipse cx="0" cy="18.3" rx="18.9" ry="4.6" fill="rgba(16,32,56,.16)"></ellipse>
       <g filter="url(#busShadow)">
-        <rect x="-20" y="-13" width="40" height="25.5" rx="6.7" fill="url(#gBus)"></rect>
-        <rect x="-15.7" y="-9.2" width="13" height="7" rx="2" fill="#EAF3FF" opacity=".95"></rect>
-        <rect x="-0.6" y="-9.2" width="13" height="7" rx="2" fill="#EAF3FF" opacity=".95"></rect>
-        <text class="bus-num" x="0" y="9.8" text-anchor="middle" font-size="9.3" font-weight="800" fill="#FFFFFF" letter-spacing=".02em">70C</text>
+        <rect x="-23.2" y="-15.1" width="46.4" height="29.6" rx="7.8" fill="url(#gBus)"></rect>
+        <rect x="-18.3" y="-10.7" width="15.1" height="8.1" rx="2.3" fill="#EAF3FF" opacity=".95"></rect>
+        <rect x="-0.6" y="-10.7" width="15.1" height="8.1" rx="2.3" fill="#EAF3FF" opacity=".95"></rect>
+        <text class="bus-num" x="0" y="11.4" text-anchor="middle" font-size="10.7" font-weight="800" fill="#FFFFFF" letter-spacing=".02em">70C</text>
       </g>
-      <circle cx="-11.5" cy="13" r="3.4" fill="#16233A"></circle>
-      <circle cx="11.5" cy="13" r="3.4" fill="#16233A"></circle>
+      <circle cx="-13.3" cy="15.2" r="3.9" fill="#16233A"></circle>
+      <circle cx="13.3" cy="15.2" r="3.9" fill="#16233A"></circle>
       <g class="bus-flags" style="display:none">
-        <rect x="21.2" y="-5.9" width="26.5" height="11.8" rx="3.8" fill="#0B7F72"></rect>
-        <text x="34.4" y="2.9" text-anchor="middle" font-size="7.9" font-weight="800" fill="#EAFFFB">저상</text>
+        <rect x="24.7" y="-6.8" width="30.5" height="13.6" rx="4.4" fill="#0B7F72"></rect>
+        <text x="39.9" y="3.3" text-anchor="middle" font-size="9.1" font-weight="800" fill="#EAFFFB">저상</text>
       </g>`;
     return g;
   }
@@ -417,7 +417,7 @@
       const flags = node.querySelector('.bus-flags');
       const disp = showFlags ? '' : 'none';
       if (flags.style.display !== disp) flags.style.display = disp;
-      flags.setAttribute('transform', v.dir === 'down' ? 'translate(-69 0)' : 'translate(0 0)');
+      flags.setAttribute('transform', v.dir === 'down' ? 'translate(-80 0)' : 'translate(0 0)');
 
       const pulse = node.querySelector('.bus-pulse');
       if (v.live) {
