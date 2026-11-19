@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 
@@ -78,20 +78,6 @@
           <svg id="routeSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="70C 노선도"></svg>
         </div>
       </div>
-
-      <div class="card buses-card" id="busesCard" hidden>
-        <div class="buses-head">
-          <h2>운행 중인 버스</h2>
-          <span id="busesCount" class="buses-count">–</span>
-        </div>
-        <div id="busesList" class="buses-list"></div>
-      </div>
-
-      <p class="footnote">
-        경기버스정보 <b>실시간 위치·도착정보</b>를 30초마다 받아옵니다. 통신이 안 되거나 잠시 오류가 나면
-        <b>시간표 기반 예상 위치</b>(오차 약 <b id="fnMinutes">최대 4분</b>)로 자동 전환돼요.
-        정류장을 누르면 그 정류장의 실시간 도착 예정 시간이 열립니다.
-      </p>
     </section>
 
     <!-- ================= 시간표 ================= -->
@@ -148,6 +134,6 @@
 
 <noscript><p style="padding:20px;font-family:sans-serif">70C 앱을 보려면 자바스크립트를 켜 주세요.</p></noscript>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

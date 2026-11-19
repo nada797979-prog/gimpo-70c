@@ -1047,7 +1047,6 @@
     updateServicePill();
     updateSummary();
     renderTimetable();
-    $('#fnMinutes').textContent = '최대 4분';
     refresh();
     requestAnimationFrame(loop);
     // 30초마다 갱신. 화면이 꺼져 있으면 쉬고, 한도를 많이 쓰면 간격을 늘립니다.
