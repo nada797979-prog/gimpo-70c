@@ -1,10 +1,10 @@
 /* 70C 전담 버스 앱 서비스 워커 — 앱 껍데기만 캐시하고, 데이터는 항상 새로 계산 */
-const CACHE = 'g70c-v8';
+const CACHE = 'g70c-v9';
 const SHELL = [
   './',
   './index.html',
-  './styles.css?v=8',
-  './app.js?v=8',
+  './styles.css?v=9',
+  './app.js?v=9',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

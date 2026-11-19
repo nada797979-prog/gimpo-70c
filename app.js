@@ -721,7 +721,7 @@
           <div class="arr-card main">
             <span class="arr-badge">70C</span>
             <div class="arr-main-text">
-              <span class="arr-when">${when}<small>${fmtHM(first)} ${stop.pass && dayDiff <= 0 ? '통과' : (dayDiff > 0 ? '첫차' : '예정')}</small></span>
+              <span class="arr-when">${when}<small>${fmtHM(first)}${dayDiff > 0 ? '' : (stop.pass ? ' 통과' : ' 예정')}</small></span>
               <span class="arr-abs">${abs}</span>
             </div>
           </div>`;
