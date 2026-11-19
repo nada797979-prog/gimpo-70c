@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>70C 전담 · 김포공항역 ↔ 힐스테이트2단지</title>
+<meta name="description" content="김포 70C번 버스 전담 앱 — 노선도 위 버스 위치, 정류장별 도착 예정 시간, 전체 시간표">
+<meta name="theme-color" content="#0B1729">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="70C">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <span class="route-badge">70C</span>
+        <div class="brand-text">
+          <strong>김포 70C</strong>
+          <span>김포공항역 ↔ 힐스테이트2단지</span>
+        </div>
+      </div>
+      <button id="refreshBtn" class="icon-btn" type="button" aria-label="새로고침">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M20 4.5V11h-6.3" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="meta-row">
+      <span id="sourcePill" class="pill"><i class="dot amber"></i><span id="sourceText">시간표 기반 예상 위치</span></span>
+      <span class="meta-time"><b id="clock">--:--</b> <span id="clockSuffix">기준</span></span>
+      <span id="servicePill" class="pill ghost">오늘 평일 · 44회</span>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- ================= 노선도 ================= -->
+    <section class="panel" id="panel-route">
+      <div class="summary card">
+        <div class="sum-cell">
+          <span class="sum-label">운행 중</span>
+          <strong id="sumRunning">–</strong>
+        </div>
+        <div class="sum-cell">
+          <span class="sum-label"><i class="dot blue"></i>김포공항역 방면</span>
+          <strong id="sumUp">–</strong>
+        </div>
+        <div class="sum-cell">
+          <span class="sum-label"><i class="dot teal"></i>힐스테이트 방면</span>
+          <strong id="sumDown">–</strong>
+        </div>
+      </div>
+
+      <div class="fav-bar card" id="favBar" hidden>
+        <div class="fav-head">
+          <span class="fav-title">즐겨찾는 정류장</span>
+          <span class="fav-hint">별표한 정류장은 여기서 바로 열려요</span>
+        </div>
+        <div class="fav-chips" id="favChips"></div>
+      </div>
+
+      <div class="card diagram-card">
+        <div class="card-head">
+          <div>
+            <h2>노선도</h2>
+            <p class="card-sub" id="diagramSub">버스를 누르면 다음 정류장, 정류장을 누르면 도착 시간</p>
+          </div>
+          <button id="speedBtn" class="speed-btn" type="button" title="데모 속도">1×</button>
+        </div>
+        <div class="svg-wrap">
+          <svg id="routeSvg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="70C 노선도"></svg>
+        </div>
+      </div>
+
+      <div class="card buses-card" id="busesCard" hidden>
+        <div class="buses-head">
+          <h2>운행 중인 버스</h2>
+          <span id="busesCount" class="buses-count">–</span>
+        </div>
+        <div id="busesList" class="buses-list"></div>
+      </div>
+
+      <p class="footnote">
+        경기버스정보 <b>실시간 위치·도착정보</b>를 30초마다 받아옵니다. 통신이 안 되거나 잠시 오류가 나면
+        <b>시간표 기반 예상 위치</b>(오차 약 <b id="fnMinutes">최대 4분</b>)로 자동 전환돼요.
+        정류장을 누르면 그 정류장의 실시간 도착 예정 시간이 열립니다.
+      </p>
+    </section>
+
+    <!-- ================= 시간표 ================= -->
+    <section class="panel hidden" id="panel-time">
+      <div class="seg" id="typeSeg" role="tablist" aria-label="시간표 구분">
+        <button class="seg-btn" data-type="weekday" type="button" role="tab">평일<em>44회</em></button>
+        <button class="seg-btn" data-type="weekend" type="button" role="tab">토·일·공휴일<em>36회</em></button>
+      </div>
+
+      <div class="card next-card" id="nextCard">
+        <div class="next-left">
+          <span class="next-label">다음 출발</span>
+          <strong class="next-time" id="nextTime">--:--</strong>
+          <span class="next-note" id="nextNote">기점 힐스테이트2단지정문</span>
+        </div>
+        <div class="next-right">
+          <span class="next-count" id="nextCount">–</span>
+          <span class="next-count-label">남은 회차</span>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="table-head">회차 · 기점 출발 · 배차간격</div>
+        <div id="ttList" class="tt-list"></div>
+      </div>
+
+      <p class="footnote">
+        힐스테이트리버시티2단지정문(기점) 출발 시각 · 김포시 대중교통과 / 선진상운(주) 게시 시간표
+        (2025. 7. 1. 시내버스 정규노선 전환). 차량 7대, 운행 06:00~22:00, 평시 배차 20~40분.
+        공휴일 판정은 기기 날짜 기준이며, 임시공휴일은 반영되지 않을 수 있습니다.
+      </p>
+    </section>
+
+  </main>
+
+  <nav class="tabbar" role="tablist">
+    <button class="tab is-active" data-tab="route" type="button" role="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5h10a2.5 2.5 0 0 1 2.5 2.5v7.5a2.5 2.5 0 0 1-2.5 2.5H7A2.5 2.5 0 0 1 4.5 14.5V7A2.5 2.5 0 0 1 7 4.5Z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.8 10.5h14.4M8 17v2.2M16 17v2.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8.2" cy="14" r="1.1" fill="currentColor"/><circle cx="15.8" cy="14" r="1.1" fill="currentColor"/></svg>
+      <span>노선도</span>
+    </button>
+    <button class="tab" data-tab="time" type="button" role="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 3.5v4M16 3.5v4M4.5 10.5h15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 14.5h2M13 14.5h2M9 17.5h2M13 17.5h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <span>시간표</span>
+    </button>
+  </nav>
+</div>
+
+<div class="scrim" id="scrim" hidden></div>
+
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sheetTitle">
+  <div class="sheet-grip" id="sheetGrip"></div>
+  <div class="sheet-body" id="sheetBody"></div>
+</section>
+
+<noscript><p style="padding:20px;font-family:sans-serif">70C 앱을 보려면 자바스크립트를 켜 주세요.</p></noscript>
+
+<script src="app.js"></script>
+</body>
+</html>
