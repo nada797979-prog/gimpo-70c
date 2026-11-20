@@ -601,9 +601,6 @@
     if (state.activeStopId === stop.i) renderSheet(stop, true);
   }
 
-  const STA_PLACE = 'https://map.kakao.com/link/search/';
-  const NAVER = 'https://map.naver.com/p/search/';
-
   function openSheet(stopId) {
     const stop = STOPS.find((s) => s.i === stopId);
     if (!stop) return;
@@ -709,10 +706,6 @@
       </div>`;
     }
 
-    const kakaoHref = stop.lat
-      ? `https://map.kakao.com/link/map/${encodeURIComponent(stop.name)},${stop.lat},${stop.lng}`
-      : STA_PLACE + encodeURIComponent(stop.name + ' 버스정류장');
-
     const noteText = model.kind === 'live'
       ? '경기버스정보 <b>실시간 도착정보</b>입니다. 30초마다 다시 확인합니다.'
       : (model.kind === 'offline'
@@ -732,17 +725,6 @@
       </div>
 
       <div class="sh-arrivals">${arrivalHtml}</div>
-
-      <div class="sh-links">
-        <a class="link-btn kakao" href="${kakaoHref}" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c-4.4 0-8 2.8-8 6.2 0 2.2 1.5 4.1 3.8 5.2l-.9 3.4c-.1.4.3.7.6.5l3.9-2.5c.2 0 .4.1.6.1 4.4 0 8-2.8 8-6.7s-3.6-6.2-8-6.2Z" fill="currentColor"/></svg>
-          카카오맵
-        </a>
-        <a class="link-btn" href="${NAVER + encodeURIComponent(stop.name + ' 버스정류장')}" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M5 4h6v6M19 20h-6v-6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          네이버지도
-        </a>
-      </div>
 
       <p class="sh-note">
         ${stop.pass ? '이 정류장은 70C가 정차하지 않고 지나가는 구간입니다. ' : ''}${noteText}
