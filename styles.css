@@ -462,8 +462,8 @@ main{
 @media (min-width:460px){
   .app{max-width:460px;margin:0 auto;box-shadow:0 0 60px -20px rgba(12,28,52,.25)}
   .tabbar{max-width:460px;left:50%;transform:translateX(-50%)}
-  .sheet{max-width:460px;left:50%;transform:translate(50%,101%)}
-  .sheet.open{transform:translate(50%,0)}
+  .sheet{max-width:460px;left:50%;transform:translate(-50%,101%)}
+  .sheet.open{transform:translate(-50%,0)}
   .scrim{max-width:460px;left:50%;transform:translateX(-50%)}
 }
 @media (prefers-reduced-motion:reduce){

@@ -601,9 +601,21 @@
     if (state.activeStopId === stop.i) renderSheet(stop, true);
   }
 
+  /* ----- 안드로이드 뒤로가기: 시트가 열려 있으면 시트만 닫기 -----
+     · 시트를 열 때 히스토리 엔트리를 하나 쌓고(pushState),
+       뒤로가기(popstate)에서는 앱을 나가지 않고 시트만 닫습니다.
+     · X·배경 터치·Esc로 직접 닫았을 때는 쌓아 둔 엔트리를 history.back()으로 정리해
+       다음 뒤로가기에서 앱이 바로 나가도록 합니다. */
+  let sheetHistory = false;   // 우리가 쌓아 둔 { g70cSheet } 엔트리가 남아 있는지
+  let selfBack = false;       // 방금 우리가 history.back()으로 정리한 직인지(그 popstate는 무시)
+
   function openSheet(stopId) {
     const stop = STOPS.find((s) => s.i === stopId);
     if (!stop) return;
+    if (state.activeStopId == null) {
+      // 시트가 닫힌 상태에서 처음 열 때만 엔트리를 쌓습니다(정류장을 바꿔도 중복 push 없음)
+      try { window.history.pushState({ g70cSheet: true }, ''); sheetHistory = true; } catch (e) { sheetHistory = false; }
+    }
     state.activeStopId = stopId;
     renderSheet(stop);
     fetchArrival(stop);
@@ -617,7 +629,7 @@
     document.body.classList.add('locked');
   }
 
-  function closeSheet() {
+  function closeSheet(fromPop) {
     state.activeStopId = null;
     $('#sheet').classList.remove('open');
     $('#sheet').setAttribute('aria-hidden', 'true');
@@ -625,6 +637,12 @@
     $$('.stop-g').forEach((g) => g.classList.remove('is-active'));
     document.body.classList.remove('locked');
     setTimeout(() => { $('#scrim').hidden = true; }, 260);
+    // 사용자가 직접 닫았을 때: 쌓아 둔 히스토리 엔트리를 없애 다음 뒤로가기가 앱을 나가게 합니다
+    if (!fromPop && sheetHistory) {
+      sheetHistory = false;
+      selfBack = true;
+      try { window.history.back(); } catch (e) { selfBack = false; }
+    }
   }
 
   function renderSheet(stop, keepScroll) {
@@ -952,9 +970,16 @@
     });
 
     // 시트 닫기
-    $('#scrim').addEventListener('click', closeSheet);
-    $('#sheetGrip').addEventListener('click', closeSheet);
+    $('#scrim').addEventListener('click', () => closeSheet());
+    $('#sheetGrip').addEventListener('click', () => closeSheet());
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+    // 안드로이드·브라우저 뒤로가기: 시트가 열려 있으면 앱을 나가지 않고 시트만 닫기
+    window.addEventListener('popstate', () => {
+      sheetHistory = false;
+      if (selfBack) { selfBack = false; return; }   // 직접 닫을 때 함께 한 정리는 그냥 흘려보냄
+      if (state.activeStopId != null) closeSheet(true);
+    });
 
     // 사파리식 아래로 스와이프 닫기
     let startY = null;
