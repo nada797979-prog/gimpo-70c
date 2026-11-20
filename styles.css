@@ -445,10 +445,16 @@ main{
 }
 .arr-sub .arr-sub-meta{font-size:12.4px;font-weight:600;color:var(--muted);text-align:right;line-height:1.4}
 .arr-sub .arr-mini{font-size:15px;font-weight:780;color:#2F4C74;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.arr-none{
-  background:#FFF8EC;border:1px solid #F8E7C4;color:#8A5A00;
-  font-size:14px;font-weight:650;padding:13px 15px;border-radius:var(--r-md);
+/* 도착 예정 차량 없음 / 실시간 미확인 */
+.arr-card.main.no-bus{
+  background:linear-gradient(130deg,#F5F7FB 0%,#EDF2F8 130%);
+  border-color:#E0E8F2;box-shadow:0 8px 20px -20px rgba(16,32,56,.6);
 }
+.arr-card.main.no-bus .arr-badge{
+  background:linear-gradient(140deg,#ADBCCF,#8C9DB3);box-shadow:none;
+}
+.arr-empty-title{font-size:19px;font-weight:850;letter-spacing:-.03em;color:#33465E;line-height:1.2}
+.arr-empty-sub{font-size:12.8px;font-weight:600;color:#6C7E95;line-height:1.45}
 
 .sh-links{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
 .link-btn{
@@ -483,8 +489,6 @@ main{
   flex:0 0 auto;font-size:10.5px;font-weight:800;letter-spacing:.08em;
   color:#0B7F72;background:#D9F7EF;border-radius:6px;padding:2.5px 6px;
 }
-.arr-cap{font-size:12px;color:var(--muted);padding:2px 2px 7px;font-weight:650;line-height:1.45}
-.arr-cap b{color:var(--ink-2);font-weight:750}
 .crowd{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:750;padding:1.5px 6px;border-radius:999px;vertical-align:1.5px}
 .crowd.c1{background:#E1F7F2;color:#0B7F72}
 .crowd.c2{background:#E7F0FF;color:#1D4ED8}

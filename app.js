@@ -547,38 +547,20 @@
 
   /* ---------------------------------------------------------
      9. 정류장 도착 정보
+        · 실시간 도착정보에 차량이 있을 때만 도착 시간을 보여줍니다.
+        · 차량이 없으면 시간표로 추정하지 않고 "도착 예정 차량 없음"으로 표기합니다.
      --------------------------------------------------------- */
-  function arrivalsAt(stop, fromAbs, limit) {
-    const out = [];
-    const base = new Date();
-    for (let d = -1; d <= 2; d++) {
-      const date = addDays(base, d);
-      const type = serviceTypeOf(date);
-      depsFor(type).forEach((m) => {
-        const arr = d * 1440 + m + stop.t;
-        if (arr >= fromAbs - 0.0001) out.push(arr);
-      });
-    }
-    out.sort((a, b) => a - b);
-    return out.slice(0, limit || 3);
-  }
-
-  function stopFacts(stop, now) {
-    const today = new Date();
-    const type = serviceTypeOf(today);
-    const deps = depsFor(type);
-    const first = deps[0] + stop.t;
-    const last = deps[deps.length - 1] + stop.t;
-    const remain = deps.filter((m) => m + stop.t >= now).length;
-    return { type, first, last, remain, total: deps.length };
-  }
 
   /* ----- 실시간 도착정보 (정류장별) ----- */
   function arrivalModel(stop) {
     const c = state.arrivals.get(stop.i);
     if (!c) return { kind: 'loading' };
     if (c.busy && !c.data) return { kind: 'loading' };
-    if (c.data && String(c.data.predictTime1 !== undefined ? c.data.predictTime1 : '').length) {
+    const hasTime = (n) => {
+      const v = c.data ? c.data['predictTime' + n] : undefined;
+      return v !== undefined && v !== null && String(v).length > 0;
+    };
+    if (c.data && (hasTime(1) || hasTime(2))) {
       return { kind: 'live', item: c.data, at: c.at };
     }
     if (c.error) return { kind: 'offline', at: c.at };
@@ -603,11 +585,16 @@
       const data = await res.json();
       const head = data && data.response && data.response.msgHeader;
       const code = head ? String(head.resultCode) : '';
-      if (code !== '0') throw new Error('resultCode ' + code);  // 4 = 도착 예정 정보 없음
-      let item = data.response.msgBody && data.response.msgBody.busArrivalItem;
-      if (Array.isArray(item)) item = item[0];
-      if (!item) throw new Error('empty');
-      state.arrivals.set(stop.i, { at: Date.now(), data: item, error: '' });
+      if (code === '4') {
+        // 4 = 도착 예정 정보 없음 → 이 정류장으로 오는 차량이 없음 (시간표로 추정하지 않음)
+        state.arrivals.set(stop.i, { at: Date.now(), data: null, error: '' });
+      } else if (code !== '0') {
+        throw new Error('resultCode ' + code);
+      } else {
+        let item = data.response.msgBody && data.response.msgBody.busArrivalItem;
+        if (Array.isArray(item)) item = item[0];
+        state.arrivals.set(stop.i, { at: Date.now(), data: item || null, error: '' });
+      }
     } catch (e) {
       state.arrivals.set(stop.i, { at: Date.now(), data: null, error: String(e.message || e) });
     }
@@ -646,9 +633,6 @@
   function renderSheet(stop, keepScroll) {
     const body = $('#sheetBody');
     const prevScroll = body.scrollTop;
-    const now = state.simTime;
-    const arr = arrivalsAt(stop, now, 3);
-    const facts = stopFacts(stop, now);
     const fav = state.favs.indexOf(stop.i) >= 0;
     const model = arrivalModel(stop);
 
@@ -702,49 +686,27 @@
           <span class="arr-abs">경기버스정보에 지금 물어보고 있어요</span>
         </div>
       </div>`;
+    } else if (model.kind === 'offline') {
+      /* ----- 실시간 정보를 받지 못한 경우: 추정하지 않고 사실만 ----- */
+      arrivalHtml = `<div class="arr-card main no-bus">
+        <span class="arr-badge">70C</span>
+        <div class="arr-main-text">
+          <span class="arr-empty-title">실시간 도착정보를 받지 못했어요</span>
+          <span class="arr-empty-sub">잠시 후 새로고침하면 다시 확인합니다</span>
+        </div>
+      </div>`;
     } else {
-      /* ----- 시간표 기반 (실시간 정보가 없을 때) ----- */
-      let sched = '';
-      if (!arr.length) {
-        sched = `<div class="arr-none">오늘 운행이 끝났어요. 내일 첫차는 ${fmtHM(arrivalsAt(stop, 1440, 1)[0] || facts.first)}입니다.</div>`;
-      } else {
-        const first = arr[0];
-        const mins = Math.max(0, Math.round(first - now));
-        const dayDiff = Math.floor(first / 1440);
-        const when = dayDiff > 0
-          ? `${dayDiff === 1 ? '내일' : '모레'} 첫차`
-          : (mins <= 0 ? '지금 도착' : `${mins}분 후 도착`);
-        const abs = dayDiff > 0
-          ? '오늘 운행이 모두 끝났어요'
-          : (stop.pass ? '이 정류장에 서지 않고 지나갑니다' : '시간표 기준 예상 도착');
-        sched += `
-          <div class="arr-card main">
-            <span class="arr-badge">70C</span>
-            <div class="arr-main-text">
-              <span class="arr-when">${when}<small>${fmtHM(first)}${dayDiff > 0 ? '' : (stop.pass ? ' 통과' : ' 예정')}</small></span>
-              <span class="arr-abs">${abs}</span>
-            </div>
-          </div>`;
-        arr.slice(1).forEach((a) => {
-          const m = Math.max(0, Math.round(a - now));
-          const d2 = Math.floor(a / 1440);
-          const txt = d2 > 0
-            ? `${d2 === 1 ? '내일' : '모레'} ${fmtHM(a)}`
-            : `${m}분 후 · ${fmtHM(a)}`;
-          sched += `
-            <div class="arr-card">
-              <span class="arr-badge" style="opacity:.85">70C</span>
-              <div class="arr-sub">
-                <span>다음 버스</span>
-                <span class="arr-mini">${txt}</span>
-              </div>
-            </div>`;
-        });
-      }
-      const capText = model.kind === 'offline'
-        ? '실시간 정보를 받지 못해 <b>시간표 기준</b>으로 보여드려요'
-        : '지금 도착 예정인 70C 정보가 없어 <b>시간표 기준</b>으로 보여드려요';
-      arrivalHtml = `<div class="arr-cap">${capText}</div>` + sched;
+      /* ----- 도착 예정 차량 없음 (시간표로 임의 추정하지 않음) ----- */
+      const emptySub = stop.pass
+        ? '이 정류장은 70C가 정차하지 않고 지나갑니다.'
+        : '현재 이 정류장으로 오는 70C 버스가 없습니다. (기점 출발 전이거나 운행 종료)';
+      arrivalHtml = `<div class="arr-card main no-bus">
+        <span class="arr-badge">70C</span>
+        <div class="arr-main-text">
+          <span class="arr-empty-title">도착 예정 차량 없음</span>
+          <span class="arr-empty-sub">${emptySub}</span>
+        </div>
+      </div>`;
     }
 
     const kakaoHref = stop.lat
@@ -754,8 +716,8 @@
     const noteText = model.kind === 'live'
       ? '경기버스정보 <b>실시간 도착정보</b>입니다. 30초마다 다시 확인합니다.'
       : (model.kind === 'offline'
-        ? '실시간 정보를 받지 못했습니다(오프라인·일시 오류). 시간표와 구간 표정속도로 계산한 <b>추정치</b>입니다.'
-        : '시간표와 구간 표정속도로 계산한 <b>추정치</b>이며, 실제 버스는 도로 상황에 따라 달라질 수 있습니다.');
+        ? '실시간 도착정보를 받지 못했습니다(오프라인·일시 오류). 잠시 후 새로고침해 주세요.'
+        : '경기버스정보 <b>실시간 도착정보</b> 기준입니다. 30초마다 다시 확인합니다.');
 
     body.innerHTML = `
       <div class="sh-head">
